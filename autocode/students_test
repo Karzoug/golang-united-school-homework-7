@@ -2,6 +2,8 @@ package coverage
 
 import (
 	"os"
+	"testing"
+	"time"
 )
 
 // DO NOT EDIT THIS FUNCTION
@@ -18,3 +20,113 @@ func init() {
 
 // WRITE YOUR CODE BELOW
 
+var testInput People
+
+func TestMain(m *testing.M) {
+	testInput = People{
+		Person{"Boris", "Johnson", time.Date(1964, time.June, 19, 0, 0, 0, 0, time.UTC)}, 
+		Person{"Max", "Frei", time.Date(1965, time.February, 22, 0, 0, 0, 0, time.UTC)},
+		Person{"Another", "Johnson", time.Date(1964, time.June, 19, 0, 0, 0, 0, time.UTC)}, 
+		Person{"Max", "Unfrei", time.Date(1965, time.February, 22, 0, 0, 0, 0, time.UTC)},
+	}
+	os.Exit(m.Run())
+}
+
+func TestPeopleLen(t *testing.T) {
+	testB := People{}
+
+	if testInput.Len() != 4 {
+		t.Errorf("expected: %d, got %d", 4, testInput.Len())
+	}
+	if testB.Len() != 0 {
+		t.Errorf("expected: %d, got %d", 0, testB.Len())
+	}
+}
+func TestPeopleLess(t *testing.T) {
+	if testInput.Less(0, 1) != false {
+		t.Errorf("wrong compare %v and %v", testInput[0], testInput[1])
+	}
+	if testInput.Less(0, 2) != false {
+		t.Errorf("wrong compare %v and %v", testInput[0], testInput[2])
+	}
+	if testInput.Less(1, 3) != true {
+		t.Errorf("wrong compare %v and %v", testInput[1], testInput[3])
+	}
+	if testInput.Less(3, 0) != true {
+		t.Errorf("wrong compare %v and %v", testInput[3], testInput[0])
+	}
+}
+
+func TestPeopleSwap(t *testing.T) {
+	personA := testInput[0]
+	personB := testInput[3]
+
+	testInput.Swap(0, 3)
+
+	if testInput[0] != personB {
+		t.Errorf("wrong swap: expected %v, got %v", personB, testInput[0])
+	}
+	if testInput[3] != personA {
+		t.Errorf("wrong swap: expected %v, got %v", personA, testInput[3])
+	}
+}
+
+func TestMatrixNew(t *testing.T) {
+	matr, err := New("1 2 3\n4 5 6  \n  7 8 9")
+	if err != nil {
+		t.Errorf("expected: no error, got %v", err.Error())
+	}
+	if matr.rows != 3 || matr.cols != 3 {
+		t.Errorf("expected: rows = 3, cols = 3, got: rows = %d, cols = %d", matr.rows, matr.cols)
+	}
+
+	matr, err = New("1 2 3\n4 5 6  \n 7 8 9 10")
+	if err == nil {
+		t.Errorf("expected: error 'rows need to be the same length', got: nil")
+	}
+
+	matr, err = New("1 2 3\n4 5 error  \n 7 8 9")
+	if err == nil {
+		t.Errorf("expected: conversion error', got: nil")
+	}
+}
+
+func TestMatrixRows(t *testing.T) {
+	matr, _ := New("1 2 3\n4 5 6  \n  7 8 9")
+	rows := matr.Rows()
+
+	if len(rows) != matr.cols || len(rows[0]) != matr.rows {
+		t.Errorf("expected: length rows = %d, length one row = %d, got: %d and %d", matr.cols, matr.rows, len(rows), len(rows[0]))
+	}
+
+	if rows[0][0] != 1 || rows[2][1] != 8 {
+		t.Errorf("expected: rows[0][0] = 1, rows[2][1] = 8, got: %d and %d", rows[0][0], rows[2][1])
+	}
+}
+
+func TestMatrixCols(t *testing.T) {
+	matr, _ := New("1 2 3\n4 5 6  \n  7 8 9")
+	cols := matr.Cols()
+
+	if len(cols) != matr.rows || len(cols[0]) != matr.cols {
+		t.Errorf("expected: length cols = %d, length one col = %d, got: %d and %d", matr.rows, matr.cols, len(cols), len(cols[0]))
+	}
+
+	if cols[0][0] != 1 || cols[2][1] != 6 {
+		t.Errorf("expected: cols[0][0] = 1, cols[2][1] = 6, got: %d and %d", cols[0][0], cols[2][1])
+	}
+}
+
+func TestMatrixSet(t *testing.T) {
+	matr, _ := New("1 2 3\n4 5 6  \n  7 8 9")
+	if !matr.Set(1, 1, 20) {
+		t.Errorf("expected: set new value 20 at row = 1, col = 1, got: no set")
+	}
+	if matr.Rows()[1][1] != 20 {
+		t.Errorf("expected: new value 20 at row = 1, col = 1, got: %d", matr.Rows()[1][1])
+	}
+
+	if matr.Set(5, 1, 13) || matr.Set(-5, 1, 13) || matr.Set(0, -4, 13) || matr.Set(0, 4, 13) {
+		t.Errorf("expected: no set new value, out of index, got: set new value")
+	}
+}
